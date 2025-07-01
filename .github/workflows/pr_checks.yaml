@@ -1,0 +1,23 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  pr-check:
+    if: startsWith(github.head_ref, 'feature/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check branch name
+        run: echo "✅ PR is from feature/* → dev"
+
+      - name: Lint Conventional Commits
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
