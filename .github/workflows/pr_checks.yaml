@@ -14,10 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check branch name
-        run: echo "✅ PR is from feature/* → dev"
-
-      - name: Lint Conventional Commits
+      - name: conventional commits
         uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
