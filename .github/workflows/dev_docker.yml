@@ -5,10 +5,49 @@ on:
     branches:
       - dev
 
+env:
+  IMAGE_TAG_PREFIX: dev
+
 jobs:
-  build-and-push-frontend:
-    runs-on: [localhost-frontend]
+  set-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      TAG_SUFFIX: ${{ steps.set-tag.outputs.TAG_SUFFIX }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Image Tag
+        id: set-tag
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "TAG_SUFFIX=${{ env.IMAGE_TAG_PREFIX }}-${SHORT_SHA}" >> $GITHUB_ENV
+          echo "TAG_SUFFIX=${{ env.IMAGE_TAG_PREFIX }}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    needs: set-tag
+    strategy:
+      matrix:
+        include:
+          - name: frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+            runs-on: localhost-frontend
+            image: fellowship-frontend
+          - name: backend1
+            context: ./backend1
+            dockerfile: ./backend1/Dockerfile
+            runs-on: localhost-backend
+            image: fellowship-backend1
+          - name: backend2
+            context: ./backend2
+            dockerfile: ./backend2/Dockerfile
+            runs-on: localhost-backend
+            image: fellowship-backend2
+
+    runs-on: ${{ matrix.runs-on }}
     environment: development
+    name: Build & Push ${{ matrix.name }}
 
     steps:
       - name: Checkout
@@ -20,50 +59,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set Image Tag
-        run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
-
-      - name: Build & Push Frontend
+      - name: Build & Push ${{ matrix.name }}
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
-
-  build-and-push-backend:
-    runs-on: [localhost-backend]
-    environment: development
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set Image Tag
-        run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
-
-      - name: Build & Push Backend1
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend1
-          file: ./backend1/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
-
-      - name: Build & Push Backend2
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend2
-          file: ./backend2/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:${{ needs.set-tag.outputs.TAG_SUFFIX }}
