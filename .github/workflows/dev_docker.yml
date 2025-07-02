@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-push-frontend:
-    runs-on: [localhost]
+    runs-on: [localhost-frontend]
     environment: development
 
     steps:
@@ -34,7 +34,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
   build-and-push-backend:
-    runs-on: [localhost]
+    runs-on: [localhost-backend]
     environment: development
 
     steps:
