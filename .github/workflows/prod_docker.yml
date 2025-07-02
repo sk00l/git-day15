@@ -21,7 +21,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set Image Tag
-        run: echo "TAG_SUFFIX=v${{ secrets.VERSION }}" >> $GITHUB_ENV
+        run: echo "TAG_SUFFIX=v${{ vars.VERSION }}" >> $GITHUB_ENV
 
       - name: Build & Push Backend1
         uses: docker/build-push-action@v5
