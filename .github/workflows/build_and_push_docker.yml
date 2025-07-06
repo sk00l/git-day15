@@ -2,18 +2,19 @@ name: Docker CI
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
     branches:
       - dev
-      - main
+    tags:
+      - 'v*.*.*'
+  workflow_run:
+    workflows: ['Release']
+    types:
+      - completed
 
 jobs:
   build-and-push-frontend:
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
     runs-on: [f1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +29,15 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION_TAG="${GITHUB_REF#refs/tags/}"
-            echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
             echo "TAG_SUFFIX=$VERSION_TAG" >> $GITHUB_ENV
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            git fetch --tags
+            LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "TAG_SUFFIX=$LATEST_TAG" >> $GITHUB_ENV
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
           fi
-
 
       - name: Build & Push Frontend
         uses: docker/build-push-action@v5
@@ -44,13 +47,9 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
-
-
   build-and-push-backend:
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
     runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,14 +59,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          logout: true
 
       - name: Set Image Tag
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             VERSION_TAG="${GITHUB_REF#refs/tags/}"
-            echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
             echo "TAG_SUFFIX=$VERSION_TAG" >> $GITHUB_ENV
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            git fetch --tags
+            LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "TAG_SUFFIX=$LATEST_TAG" >> $GITHUB_ENV
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
@@ -80,9 +81,6 @@ jobs:
           file: ./backend1/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
-
-      - name: Check Docker login
-        run: docker info
 
       - name: Build & Push Backend2
         uses: docker/build-push-action@v5
