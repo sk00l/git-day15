@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/sk00l/git-day15/compare/v1.0.0...v1.0.1) (2025-07-06)
+
+
+### Bug Fixes
+
+* updated with new CI ([947e024](https://github.com/sk00l/git-day15/commit/947e024f157ae1f9a84156f6f410f35d97e4a0cf))
+
 # 1.0.0 (2025-07-06)
 
 
