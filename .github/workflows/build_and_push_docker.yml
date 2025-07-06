@@ -2,6 +2,8 @@ name: Docker CI
 
 on:
   push:
+    tags:
+      - 'v*.*.*'
     branches:
       - dev
       - main
@@ -25,7 +27,7 @@ jobs:
       - name: Set Image Tag
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "TAG_SUFFIX=v${{ vars.VERSION }}" >> $GITHUB_ENV
+            echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
@@ -37,7 +39,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.VERSION_TAG }}
 
   build-and-push-backend:
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
@@ -57,7 +59,7 @@ jobs:
       - name: Set Image Tag
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "TAG_SUFFIX=v${{ vars.VERSION }}" >> $GITHUB_ENV
+            echo "TAG_SUFFIX=prod-backend-${SHORT_SHA}" >> $GITHUB_ENV
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
