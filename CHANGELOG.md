@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/sk00l/git-day15/compare/v2.0.0...v3.0.0) (2025-07-06)
+
+
+* fix!: completely refactored login system ([6878ffb](https://github.com/sk00l/git-day15/commit/6878ffb61ea38ec9758e0c0013f626e5ed504703))
+* fix!: completely refactored login system ([0dd185a](https://github.com/sk00l/git-day15/commit/0dd185add3f1bb94adcf5110bb00802cc0a265aa))
+
+
+### BREAKING CHANGES
+
+* Login flow has changed to OAuth2 and previous tokens will no longer work.
+* Login flow has changed to OAuth2 and previous tokens will no longer work.
+
 # [2.0.0](https://github.com/sk00l/git-day15/compare/v1.0.1...v2.0.0) (2025-07-06)
 
 
