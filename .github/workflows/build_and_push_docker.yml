@@ -1,14 +1,16 @@
-name: Dev Docker CI
+name: Docker CI
 
 on:
   push:
     branches:
       - dev
+      - main
 
 jobs:
   build-and-push-frontend:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
     runs-on: [f1]
-    environment: development
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
     steps:
       - name: Checkout
@@ -22,8 +24,12 @@ jobs:
 
       - name: Set Image Tag
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "TAG_SUFFIX=v${{ vars.VERSION }}" >> $GITHUB_ENV
+          else
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
+          fi
 
       - name: Build & Push Frontend
         uses: docker/build-push-action@v5
@@ -32,9 +38,11 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+
   build-and-push-backend:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
     runs-on: [b1]
-    environment: development
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
     steps:
       - name: Checkout
@@ -48,8 +56,12 @@ jobs:
 
       - name: Set Image Tag
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "TAG_SUFFIX=v${{ vars.VERSION }}" >> $GITHUB_ENV
+          else
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
+          fi
 
       - name: Build & Push Backend1
         uses: docker/build-push-action@v5
