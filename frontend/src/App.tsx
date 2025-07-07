@@ -1,6 +1,6 @@
 import { ClerkProvider, SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Box, Button, createTheme, CssBaseline, ThemeProvider, Typography } from "@mui/material";
-import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route as Router, Routes } from "react-router-dom";
 import AllBlogs from "./pages/AllBlogs";
 import CompleteSignup from "./pages/CompleteSignup";
 import CreateBlog from "./pages/CreateBlog";
