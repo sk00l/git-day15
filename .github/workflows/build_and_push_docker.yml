@@ -47,6 +47,18 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
+      - name: Pull frontend image
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+
+      - name: Save Docker image for frontend
+        run: |
+           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }} -o frontend.tar
+      - name: Upload frontend image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-image
+          path: frontend.tar
+
   build-and-push-backend:
     runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
@@ -83,6 +95,18 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
 
+      - name: Pull backend1 image
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
+
+      - name: Save Docker image for backend1
+        run: |
+           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} -o backend1.tar
+      - name: Upload backend1 image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend1-image
+          path: backend1.tar
+
       - name: Build & Push Backend2
         uses: docker/build-push-action@v6
         with:
@@ -90,3 +114,15 @@ jobs:
           file: ./backend2/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+
+      - name: Pull backend2 image
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+
+      - name: Save Docker image for backend2
+        run: |
+           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }} -o backend2.tar
+      - name: Upload backend2 image tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend2-image
+          path: backend2.tar
