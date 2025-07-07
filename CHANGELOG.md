@@ -1,3 +1,20 @@
+# [4.1.0](https://github.com/sk00l/git-day15/compare/v4.0.0...v4.1.0) (2025-07-07)
+
+
+### Features
+
+* **api:** add new CI artifact ([e5bd3ee](https://github.com/sk00l/git-day15/commit/e5bd3ee73950d64a69c667635241bcfa714d6c18))
+* **api:** add new CI artifact ([c0e6edd](https://github.com/sk00l/git-day15/commit/c0e6eddffae16ed4ceab4527fc740e116358a6e5))
+* **api:** add new CI artifact ([209ce45](https://github.com/sk00l/git-day15/commit/209ce4583983c00ab351b5cb9c1850ff84f5037b))
+* **api:** add new CI artifact ([6baced2](https://github.com/sk00l/git-day15/commit/6baced2510c31e1fb2932821d022f0bc90848aa6))
+* **api:** add new CI artifact ([588a6bf](https://github.com/sk00l/git-day15/commit/588a6bfb0bcbc5ccb0e5ef48163e98c8cec457a3))
+* **api:** add new CI artifact ([915a38f](https://github.com/sk00l/git-day15/commit/915a38f01120dfa33abe3be12240071493e9dc2c))
+* **api:** add new CI artifact ([d96c1b3](https://github.com/sk00l/git-day15/commit/d96c1b30150b6e848ad29a45989cad47004b7839))
+* **api:** add new CI artifact ([7022f18](https://github.com/sk00l/git-day15/commit/7022f1827dd0f394887dc04e4392a79504ba5b95))
+* **api:** add new CI artifact ([18b0794](https://github.com/sk00l/git-day15/commit/18b07949f2692513374d1302749088566b6355bb))
+* **api:** add new CI artifact ([20035f3](https://github.com/sk00l/git-day15/commit/20035f3de2346ef9ebbeb3cb77ff7a6b0e33e871))
+* **api:** add new CI artifact ([b5f0a90](https://github.com/sk00l/git-day15/commit/b5f0a903ba3b94f8e9583a8427e1790585a9553b))
+
 # [4.0.0](https://github.com/sk00l/git-day15/compare/v3.0.0...v4.0.0) (2025-07-07)
 
 
