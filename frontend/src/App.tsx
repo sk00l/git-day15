@@ -1,6 +1,6 @@
 import { ClerkProvider, SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Box, Button, createTheme, CssBaseline, ThemeProvider, Typography } from "@mui/material";
-import { Navigate, Route as Router, Routes } from "react-router-dom";
+import { Navigate, Routes } from "react-router-dom";
 import AllBlogs from "./pages/AllBlogs";
 import CompleteSignup from "./pages/CompleteSignup";
 import CreateBlog from "./pages/CreateBlog";
@@ -15,7 +15,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box sx={{ minHeight: "100vh", width: '100%', bgcolor: "#f5f5f5" }}>
-          <Router>
+
             <Routes>
               <Route path="/" element={<Navigate to="/blogs" replace />} />
               <Route path="/blogs" element={<AllBlogs />} />
@@ -87,7 +87,6 @@ function App() {
               />
               <Route path="/complete-signup" element={<CompleteSignup />} />
             </Routes>
-          </Router>
         </Box>
       </ThemeProvider>
     </ClerkProvider>
