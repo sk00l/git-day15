@@ -1,3 +1,11 @@
+# [4.2.0](https://github.com/sk00l/git-day15/compare/v4.1.0...v4.2.0) (2025-07-07)
+
+
+### Features
+
+* building frontend and adding to pages ([d52f59b](https://github.com/sk00l/git-day15/commit/d52f59bcfa89d1da9d844a06c0f25c1997254140))
+* building frontend and adding to pages ([049b0c6](https://github.com/sk00l/git-day15/commit/049b0c69fb7e0a029beac6a3b242752ee3c2726a))
+
 # [4.1.0](https://github.com/sk00l/git-day15/compare/v4.0.0...v4.1.0) (2025-07-07)
 
 
