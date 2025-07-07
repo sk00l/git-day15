@@ -16,16 +16,15 @@ jobs:
     runs-on: [f1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setting up build x
+
+      - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      # setting up caching for docker layer
 
       - name: Cache Docker layers
         uses: actions/cache@v3
@@ -36,17 +35,17 @@ jobs:
             ${{ runner.os }}-buildx-frontend-
             ${{ runner.os }}-buildx-main
 
-
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+
       - name: Set Image Tag
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION_TAG="${GITHUB_REF#refs/tags/}"
+            VERSION_TAG="${GITHUB_REF
             echo "TAG_SUFFIX=$VERSION_TAG" >> $GITHUB_ENV
           elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             git fetch --tags
@@ -55,7 +54,6 @@ jobs:
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
-          fi
 
       - name: Build & Push Frontend
         uses: docker/build-push-action@v6
@@ -65,33 +63,28 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
           builder: ${{ steps.buildx.outputs.name }}
-          cache-from: type=local,src=/tmp/.buildx-cache-frontend
-          cache-to: type=local,dest=/tmp/.buildx-cache-frontend-new,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-
-      - name: Move frontend cache
-        run: |
-          rm -rf /tmp/.buildx-cache-frontend
-          mv /tmp/.buildx-cache-frontend-new /tmp/.buildx-cache-frontend
-
-
-      - name: upload frontend artifact
+      - name: Upload Frontend Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: front-end build
+          name: frontend-build
           path: ./frontend/dist/
-
 
   build-and-push-backend:
     runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
+
 
       - name: Cache Docker layers Backend1
         uses: actions/cache@v3
@@ -102,6 +95,7 @@ jobs:
             ${{ runner.os }}-buildx-backend1-
             ${{ runner.os }}-buildx-main
 
+
       - name: Cache Docker layers Backend2
         uses: actions/cache@v3
         with:
@@ -111,17 +105,18 @@ jobs:
             ${{ runner.os }}-buildx-backend2-
             ${{ runner.os }}-buildx-main
 
+
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          logout: true
+
 
       - name: Set Image Tag
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION_TAG="${GITHUB_REF#refs/tags/}"
+            VERSION_TAG="${GITHUB_REF
             echo "TAG_SUFFIX=$VERSION_TAG" >> $GITHUB_ENV
           elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             git fetch --tags
@@ -132,6 +127,7 @@ jobs:
             echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
           fi
 
+
       - name: Build & Push Backend1
         uses: docker/build-push-action@v6
         with:
@@ -140,19 +136,16 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
           builder: ${{ steps.buildx.outputs.name }}
-          cache-from: type=local,src=/tmp/.buildx-cache-backend1
-          cache-to: type=local,dest=/tmp/.buildx-cache-backend1-new,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Move Backend1 cache
-        run: |
-          rm -rf /tmp/.buildx-cache-backend1
-          mv /tmp/.buildx-cache-backend1-new /tmp/.buildx-cache-backend1
 
       - name: Upload Backend1 Artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend1-build
           path: ./backend1/dist/
+
 
       - name: Build & Push Backend2
         uses: docker/build-push-action@v6
@@ -162,13 +155,8 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
           builder: ${{ steps.buildx.outputs.name }}
-          cache-from: type=local,src=/tmp/.buildx-cache-backend2
-          cache-to: type=local,dest=/tmp/.buildx-cache-backend2-new,mode=max
-
-      - name: Move Backend2 cache
-        run: |
-          rm -rf /tmp/.buildx-cache-backend2
-          mv /tmp/.buildx-cache-backend2-new /tmp/.buildx-cache-backend2
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
 
       - name: Upload Backend2 Artifact
