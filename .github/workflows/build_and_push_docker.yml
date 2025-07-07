@@ -54,17 +54,15 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
-      - name: Pull frontend image
-        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
       - name: Save Docker image for frontend
         run: |
-           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }} -o frontend.tar
+           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }} | gzip > frontend.tar.gz
       - name: Upload frontend image tar
         uses: actions/upload-artifact@v4
         with:
           name: frontend-image
-          path: frontend.tar
+          path: frontend.tar.gz
 
   build-and-push-backend:
     runs-on: [b1]
@@ -108,17 +106,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
 
-      - name: Pull backend1 image
-        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
-
       - name: Save Docker image for backend1
         run: |
-           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} -o backend1.tar
+           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} | gzip > backend1.tar.gz
       - name: Upload backend1 image tar
         uses: actions/upload-artifact@v4
         with:
           name: backend1-image
-          path: backend1.tar
+          path: backend1.tar.gz
 
       - name: Build & Push Backend2
         uses: docker/build-push-action@v6
@@ -128,14 +123,12 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
 
-      - name: Pull backend2 image
-        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
 
       - name: Save Docker image for backend2
         run: |
-           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }} -o backend2.tar
+           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }} | gzip > backend2.tar.gz
       - name: Upload backend2 image tar
         uses: actions/upload-artifact@v4
         with:
           name: backend2-image
-          path: backend2.tar
+          path: backend2.tar.gz
