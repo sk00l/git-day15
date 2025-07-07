@@ -18,27 +18,6 @@ jobs:
     runs-on: [f1]
     environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
     steps:
-      - name: Force cleanup runner workspace
-        run: |
-          echo "Force cleaning runner workspace..."
-          
-          # Clean up any existing artifacts
-          rm -f frontend.tar.gz || true
-          
-          # Clean Docker system
-          docker system prune -f || true
-          
-          # Clean up workspace (only files we own)
-          find ${{ github.workspace }} -type f -delete || true
-          find ${{ github.workspace }} -type d -empty -delete || true
-        continue-on-error: true
-
-      - name: Post-job cleanup
-        if: always()
-        run: |
-          echo "Post-job cleanup..."
-          docker system prune -f || true
-          rm -f frontend.tar.gz || true
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,20 +69,6 @@ jobs:
     runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
     steps:
-      - name: Force cleanup runner workspace
-        run: |
-          echo "Force cleaning runner workspace..."
-          
-          # Clean up any existing artifacts
-          rm -f backend1.tar.gz backend2.tar.gz || true
-          
-          # Clean Docker system
-          docker system prune -f || true
-          
-          # Clean up workspace (only files we own)
-          find ${{ github.workspace }} -type f -delete || true
-          find ${{ github.workspace }} -type d -empty -delete || true
-        continue-on-error: true
 
       - name: Checkout
         uses: actions/checkout@v4
