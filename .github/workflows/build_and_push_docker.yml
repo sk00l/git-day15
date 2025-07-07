@@ -1,9 +1,7 @@
 name: Docker CI
-
 permissions:
   contents: write
   issues: write
-
 on:
   push:
     branches:
@@ -18,12 +16,28 @@ on:
 jobs:
   build-and-push-frontend:
     runs-on: [f1]
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
     steps:
-      - name: Clean up stale frontend logs
+      - name: Force cleanup runner workspace
         run: |
-          echo "Cleaning /home/skool/runner/actions-runner/frontend/_diag/pages"
-          rm -rf /home/skool/runner/actions-runner/frontend/_diag/pages || true
+          echo "Force cleaning runner workspace..."
+          # Stop any running actions processes
+          sudo pkill -f "actions-runner" || true
+          sleep 3
+          
+          # Remove all diagnostic logs
+          sudo rm -rf /home/skool/runner/actions-runner/*/\_diag || true
+          sudo rm -rf /home/skool/runner/actions-runner/\_diag || true
+          
+          # Clean up any existing artifacts
+          rm -f frontend.tar.gz || true
+          
+          # Clean Docker system
+          docker system prune -f || true
+          
+          # Clean up workspace
+          sudo rm -rf ${{ github.workspace }}/* || true
+        continue-on-error: true
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,24 +72,43 @@ jobs:
 
       - name: Save and compress frontend Docker image
         run: |
+          # Remove any existing tar file
+          rm -f frontend.tar.gz || true
           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }} | gzip > frontend.tar.gz
         continue-on-error: true
 
       - name: Upload frontend image tar
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: success() && hashFiles('frontend.tar.gz') != ''
         with:
-          name: frontend-image
+          name: frontend-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: frontend.tar.gz
+          retention-days: 7
 
   build-and-push-backend:
     runs-on: [b1]
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
     steps:
-      - name: Clean up stale backend logs
+      - name: Force cleanup runner workspace
         run: |
-          echo "Cleaning /home/skool/runner/actions-runner/backend/_diag/pages"
-          rm -rf /home/skool/runner/actions-runner/backend/_diag/pages || true
+          echo "Force cleaning runner workspace..."
+          # Stop any running actions processes
+          sudo pkill -f "actions-runner" || true
+          sleep 3
+          
+          # Remove all diagnostic logs
+          sudo rm -rf /home/skool/runner/actions-runner/*/\_diag || true
+          sudo rm -rf /home/skool/runner/actions-runner/\_diag || true
+          
+          # Clean up any existing artifacts
+          rm -f backend1.tar.gz backend2.tar.gz || true
+          
+          # Clean Docker system
+          docker system prune -f || true
+          
+          # Clean up workspace
+          sudo rm -rf ${{ github.workspace }}/* || true
+        continue-on-error: true
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -111,15 +144,18 @@ jobs:
 
       - name: Save and compress backend1 Docker image
         run: |
+          # Remove any existing tar file
+          rm -f backend1.tar.gz || true
           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} | gzip > backend1.tar.gz
         continue-on-error: true
 
       - name: Upload backend1 image tar
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: success() && hashFiles('backend1.tar.gz') != ''
         with:
-          name: backend1-image
+          name: backend1-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: backend1.tar.gz
+          retention-days: 7
 
       - name: Build & Push Backend2
         uses: docker/build-push-action@v6
@@ -131,12 +167,15 @@ jobs:
 
       - name: Save and compress backend2 Docker image
         run: |
+          # Remove any existing tar file
+          rm -f backend2.tar.gz || true
           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }} | gzip > backend2.tar.gz
         continue-on-error: true
 
       - name: Upload backend2 image tar
         uses: actions/upload-artifact@v4
-        if: success() || failure()
+        if: success() && hashFiles('backend2.tar.gz') != ''
         with:
-          name: backend2-image
+          name: backend2-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: backend2.tar.gz
+          retention-days: 7
