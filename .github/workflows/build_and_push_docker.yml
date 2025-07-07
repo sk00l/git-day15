@@ -16,15 +16,13 @@ jobs:
     runs-on: [f1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Clean up _diag pages
+      - name: Clean up stale frontend logs
         run: |
           echo "Cleaning /home/skool/runner/actions-runner/frontend/_diag/pages"
-          rm -f /home/skool/runner/actions-runner/frontend/_diag/pages/*.log || true
+          rm -rf /home/skool/runner/actions-runner/frontend/_diag/pages || true
 
-
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Log in to DockerHub
         uses: docker/login-action@v3
@@ -54,10 +52,10 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
-
-      - name: Save Docker image for frontend
+      - name: Save and compress frontend Docker image
         run: |
-           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }} | gzip > frontend.tar.gz
+          docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }} | gzip > frontend.tar.gz
+
       - name: Upload frontend image tar
         uses: actions/upload-artifact@v4
         with:
@@ -68,14 +66,13 @@ jobs:
     runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Clean up _diag pages
+      - name: Clean up stale backend logs
         run: |
           echo "Cleaning /home/skool/runner/actions-runner/backend/_diag/pages"
-          rm -f /home/skool/runner/actions-runner/backend/_diag/pages/*.log || true
+          rm -rf /home/skool/runner/actions-runner/backend/_diag/pages || true
 
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Log in to DockerHub
         uses: docker/login-action@v3
@@ -106,9 +103,10 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
 
-      - name: Save Docker image for backend1
+      - name: Save and compress backend1 Docker image
         run: |
-           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} | gzip > backend1.tar.gz
+          docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} | gzip > backend1.tar.gz
+
       - name: Upload backend1 image tar
         uses: actions/upload-artifact@v4
         with:
@@ -123,10 +121,10 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
 
-
-      - name: Save Docker image for backend2
+      - name: Save and compress backend2 Docker image
         run: |
-           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }} | gzip > backend2.tar.gz
+          docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }} | gzip > backend2.tar.gz
+
       - name: Upload backend2 image tar
         uses: actions/upload-artifact@v4
         with:
