@@ -40,7 +40,7 @@ jobs:
           fi
 
       - name: Build & Push Frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
@@ -76,7 +76,7 @@ jobs:
           fi
 
       - name: Build & Push Backend1
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend1
           file: ./backend1/Dockerfile
@@ -84,7 +84,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
 
       - name: Build & Push Backend2
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend2
           file: ./backend2/Dockerfile
