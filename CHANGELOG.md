@@ -1,3 +1,10 @@
+# [4.8.0](https://github.com/sk00l/git-day15/compare/v4.7.0...v4.8.0) (2025-07-08)
+
+
+### Features
+
+* [no ci] asd ([911d366](https://github.com/sk00l/git-day15/commit/911d366a4f64e3012ac6590395fdfb3272873b53))
+
 # [4.7.0](https://github.com/sk00l/git-day15/compare/v4.6.0...v4.7.0) (2025-07-08)
 
 
