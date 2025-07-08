@@ -67,15 +67,29 @@ jobs:
           retention-days: 7
 
 
-      - name: Trivy scan frontend image
+      - name: Set up Trivy
         if: >
           github.ref == 'refs/heads/main' ||
           github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/setup-trivy@v0.2.0
         with:
-          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
-          format: 'html'
-          output: 'frontend-trivy.html'
+          version: v0.64.1
+
+      - name: Download Trivy HTML template
+        if: >
+          github.ref == 'refs/heads/main' ||
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+        run: curl -o html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+
+      - name: Run Trivy HTML scan for frontend
+        if: >
+          github.ref == 'refs/heads/main' ||
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+        run: |
+          trivy image --format template --template @html.tpl \
+            -o frontend-trivy.html \
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+
 
 
   build-and-push-backend:
@@ -129,15 +143,29 @@ jobs:
           path: backend1.tar.gz
           retention-days: 7
 
-      - name: Trivy scan backend1 image
+      - name: Set up Trivy
         if: >
           github.ref == 'refs/heads/main' ||
           github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/setup-trivy@v0.2.0
         with:
-          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
-          format: 'html'
-          output: 'backend1-trivy.html'
+          version: v0.64.1
+
+      - name: Download Trivy HTML template
+        if: >
+          github.ref == 'refs/heads/main' ||
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+        run: curl -o html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+
+      - name: Run Trivy HTML scan for backend1
+        if: >
+          github.ref == 'refs/heads/main' ||
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+        run: |
+          trivy image --format template --template @html.tpl \
+            -o backend1-trivy.html \
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
+
 
 
       - name: Log in to DockerHub
@@ -170,15 +198,29 @@ jobs:
           retention-days: 7
 
 
-      - name: Trivy scan backend2 image
+      - name: Set up Trivy
         if: >
+          github.ref == 'refs/heads/main' ||
           github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
-          || github.ref == 'refs/heads/main'
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/setup-trivy@v0.2.0
         with:
-          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
-          format: 'html'
-          output: 'backend2-trivy.html'
+          version: v0.64.1
+
+      - name: Download Trivy HTML template
+        if: >
+          github.ref == 'refs/heads/main' ||
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+        run: curl -o html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+
+      - name: Run Trivy HTML scan for backend2
+        if: >
+          github.ref == 'refs/heads/main' ||
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+        run: |
+          trivy image --format template --template @html.tpl \
+            -o backend2-trivy.html \
+            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+
 
   publish-report:
     if: >
