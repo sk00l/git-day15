@@ -24,6 +24,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: yarn install --frozen-lockfile
+
+      - name: Build frontend static site
+        working-directory: frontend
+        run: yarn build
+
+      - name: Upload frontend static files
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-static-dist
+          path: frontend/dist
+
+
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
@@ -281,6 +296,13 @@ jobs:
           name: backend2-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: images
 
+      - name: Download frontend static site
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-static-dist
+          path: reports/frontend
+
+
       - name: Download Trivy report (frontend)
         uses: actions/download-artifact@v4
         with:
@@ -317,7 +339,7 @@ jobs:
             <body>
               <h1>Fellowship App - Reports Dashboard</h1>
               <ul>
-                <li><a href="https://sk00l.github.io/git-day15/">Deployed Frontend</a></li>
+                <li><a href="frontend/index.html">Deployed Frontend</a></li>
                 <li><a href="frontend-trivy.html">Frontend Trivy Report</a></li>
                 <li><a href="backend1-trivy.html">Backend1 Trivy Report</a></li>
                 <li><a href="backend2-trivy.html">Backend2 Trivy Report</a></li>
