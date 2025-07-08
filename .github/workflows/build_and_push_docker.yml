@@ -17,7 +17,7 @@ on:
 
 jobs:
   build-and-push-frontend:
-    runs-on: ubuntu-latest
+    runs-on: [f1]
     environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
     steps:
 
@@ -119,7 +119,7 @@ jobs:
 
 
   build-and-push-backend:
-    runs-on: ubuntu-latest
+    runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
     steps:
 
@@ -279,14 +279,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Download frontend static site
+
       - name: Download frontend static site
         uses: actions/download-artifact@v4
         with:
           name: frontend-static-dist
           path: reports/frontend
 
-      # Download Trivy reports
+
       - name: Download Trivy report (frontend)
         uses: actions/download-artifact@v4
         with:
@@ -305,7 +305,7 @@ jobs:
           name: backend2-trivy-report
           path: reports
 
-      # Generate HTML dashboard
+
       - name: Generate index.html
         run: |
           cat <<EOF > reports/index.html
@@ -350,5 +350,3 @@ jobs:
           git add .
           git commit -m "Update reports from CI run $GITHUB_RUN_ID" || echo "No changes to commit"
           git push origin report
-
-
