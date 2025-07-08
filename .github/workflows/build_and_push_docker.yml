@@ -90,6 +90,15 @@ jobs:
             -o frontend-trivy.html \
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
 
+      - name: Upload Trivy report (frontend)
+        if: >
+          success() && (github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-trivy-report
+          path: frontend-trivy.html
+
+
 
 
   build-and-push-backend:
@@ -166,6 +175,15 @@ jobs:
             -o backend1-trivy.html \
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
 
+      - name: Upload Trivy report (backend1)
+        if: >
+          success() && (github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend1-trivy-report
+          path: backend1-trivy.html
+
+
 
 
       - name: Log in to DockerHub
@@ -221,6 +239,15 @@ jobs:
             -o backend2-trivy.html \
             docker.io/${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
 
+      - name: Upload Trivy report (backend2)
+        if: >
+          success() && (github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend2-trivy-report
+          path: backend2-trivy.html
+
+
 
   publish-report:
     if: >
@@ -252,12 +279,32 @@ jobs:
           name: backend2-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: images
 
+      - name: Download Trivy report (frontend)
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-trivy-report
+          path: .
+
+      - name: Download Trivy report (backend1)
+        uses: actions/download-artifact@v4
+        with:
+          name: backend1-trivy-report
+          path: .
+
+      - name: Download Trivy report (backend2)
+        uses: actions/download-artifact@v4
+        with:
+          name: backend2-trivy-report
+          path: .
+
+
       - name: Get Trivy Reports
         run: |
           mkdir -p reports
-          mv frontend-trivy.html reports/
-          mv backend1-trivy.html reports/
+          mv frontend-trivy.html reports/ || true
+          mv backend1-trivy.html reports/ || true
           mv backend2-trivy.html reports/ || true
+
 
       - name: Generate index.html
         run: |
