@@ -6,7 +6,7 @@ import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename="/git-day15">
+    <BrowserRouter basename="/git-day15/frontend">
       <App />
     </BrowserRouter>
   </StrictMode>
