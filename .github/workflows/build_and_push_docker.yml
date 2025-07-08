@@ -66,6 +66,16 @@ jobs:
           path: frontend.tar.gz
           retention-days: 7
 
+
+      - name: Trivy scan frontend image
+        if: github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+          format: 'html'
+          output: 'frontend-trivy.html'
+
+
   build-and-push-backend:
     runs-on: [b1]
     environment: ${{ github.ref == 'refs/heads/dev' && 'development' || 'production' }}
@@ -79,7 +89,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          logout: true
 
       - name: Set Image Tag
         run: |
@@ -118,6 +127,21 @@ jobs:
           path: backend1.tar.gz
           retention-days: 7
 
+      - name: Trivy scan frontend image
+        if: github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
+          format: 'html'
+          output: 'backend1-trivy.html'
+
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Build & Push Backend2
         uses: docker/build-push-action@v6
         with:
@@ -140,3 +164,84 @@ jobs:
           name: backend2-image-${{ github.run_id }}-${{ github.run_attempt }}
           path: backend2.tar.gz
           retention-days: 7
+
+
+      - name: Trivy scan frontend image
+        if: >
+          github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+          || github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
+          format: 'html'
+          output: 'backend1-trivy.html'
+
+  publish-report:
+    if: >
+      github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main'
+
+    runs-on: ubuntu-latest
+    needs:
+      - build-and-push-frontend
+      - build-and-push-backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download frontend image
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: images
+
+      - name: Download backend1 image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend1-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: images
+
+      - name: Download backend2 image
+        uses: actions/download-artifact@v4
+        with:
+          name: backend2-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: images
+
+      - name: Get Trivy Reports
+        run: |
+          mkdir -p reports
+          mv frontend-trivy.html reports/
+          mv backend1-trivy.html reports/
+          mv backend2-trivy.html reports/ || true
+
+      - name: Generate index.html
+        run: |
+          cd reports
+          cat <<EOF > index.html
+          <html>
+            <head><title>Security Reports</title></head>
+            <body>
+              <h1>Fellowship App - Reports Dashboard</h1>
+              <ul>
+                <li><a href="https://sk00l.github.io/git-day15/">Deployed Frontend</a></li>
+                <li><a href="frontend-trivy.html">Frontend Trivy Report</a></li>
+                <li><a href="backend1-trivy.html">Backend1 Trivy Report</a></li>
+                <li><a href="backend2-trivy.html">Backend2 Trivy Report</a></li>
+              </ul>
+            </body>
+          </html>
+          EOF
+
+      - name: Push reports to report branch
+        run: |
+          cd reports
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git init
+          git checkout --orphan report
+          git add .
+          git commit -m "Update security reports"
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push --force origin report
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
