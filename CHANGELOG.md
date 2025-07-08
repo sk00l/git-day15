@@ -1,3 +1,11 @@
+# [4.18.0](https://github.com/sk00l/git-day15/compare/v4.17.0...v4.18.0) (2025-07-08)
+
+
+### Features
+
+* added deployment ([4e7c295](https://github.com/sk00l/git-day15/commit/4e7c2957b287ed3c16bb11b9aebb7791565de649))
+* added deployment ([2b4b607](https://github.com/sk00l/git-day15/commit/2b4b6071b4d232d2ce32f600cbc5e3e6dc259ee5))
+
 # [4.17.0](https://github.com/sk00l/git-day15/compare/v4.16.0...v4.17.0) (2025-07-08)
 
 
