@@ -274,66 +274,41 @@ jobs:
     needs:
       - build-and-push-frontend
       - build-and-push-backend
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download frontend image
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-image-${{ github.run_id }}-${{ github.run_attempt }}
-          path: images
-
-      - name: Download backend1 image
-        uses: actions/download-artifact@v4
-        with:
-          name: backend1-image-${{ github.run_id }}-${{ github.run_attempt }}
-          path: images
-
-      - name: Download backend2 image
-        uses: actions/download-artifact@v4
-        with:
-          name: backend2-image-${{ github.run_id }}-${{ github.run_attempt }}
-          path: images
-
+      # Download frontend static site
       - name: Download frontend static site
         uses: actions/download-artifact@v4
         with:
           name: frontend-static-dist
           path: reports/frontend
 
-
+      # Download Trivy reports
       - name: Download Trivy report (frontend)
         uses: actions/download-artifact@v4
         with:
           name: frontend-trivy-report
-          path: .
+          path: reports
 
       - name: Download Trivy report (backend1)
         uses: actions/download-artifact@v4
         with:
           name: backend1-trivy-report
-          path: .
+          path: reports
 
       - name: Download Trivy report (backend2)
         uses: actions/download-artifact@v4
         with:
           name: backend2-trivy-report
-          path: .
+          path: reports
 
-
-      - name: Get Trivy Reports
-        run: |
-          mkdir -p reports
-          mv frontend-trivy.html reports/ || true
-          mv backend1-trivy.html reports/ || true
-          mv backend2-trivy.html reports/ || true
-
-
+      # Generate HTML dashboard
       - name: Generate index.html
         run: |
-          cd reports
-          cat <<EOF > index.html
+          cat <<EOF > reports/index.html
           <html>
             <head><title>Security Reports</title></head>
             <body>
@@ -348,24 +323,12 @@ jobs:
           </html>
           EOF
 
-      - name: Upload github-pages artifact
-        uses: actions/upload-artifact@v4
+      # Upload Pages artifact
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: reports/
+          path: reports
 
-
-      - name: Push reports to report branch
-        run: |
-          cd reports
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git init
-          git checkout --orphan report
-          git add .
-          git commit -m "Update security reports"
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push --force origin report
-
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
