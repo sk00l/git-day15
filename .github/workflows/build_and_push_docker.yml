@@ -326,6 +326,13 @@ jobs:
           </html>
           EOF
 
+      - name: Upload github-pages artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-pages
+          path: reports/
+
+
       - name: Push reports to report branch
         run: |
           cd reports
