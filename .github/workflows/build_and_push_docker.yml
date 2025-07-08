@@ -328,13 +328,22 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Backup reports before switching branch
+        run: |
+          mkdir -p /tmp/reports-copy
+          cp -r reports/* /tmp/reports-copy/
+
       - name: Switch to report branch
         run: |
           git fetch origin report:report || git checkout --orphan report
           git checkout report
           rm -rf *
-          cp -r reports/* .
+
+      - name: Restore reports to root
+        run: |
+          cp -r /tmp/reports-copy/* .
           touch .nojekyll
+
 
       - name: Commit and Push report
         run: |
