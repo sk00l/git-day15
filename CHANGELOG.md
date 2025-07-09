@@ -1,3 +1,10 @@
+# [4.28.0](https://github.com/sk00l/git-day15/compare/v4.27.0...v4.28.0) (2025-07-09)
+
+
+### Features
+
+* [no ci] ([c9f858a](https://github.com/sk00l/git-day15/commit/c9f858a8a1af3edd76f24a9df3293bc209f6ab73))
+
 # [4.27.0](https://github.com/sk00l/git-day15/compare/v4.26.0...v4.27.0) (2025-07-09)
 
 
