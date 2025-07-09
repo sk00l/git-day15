@@ -349,40 +349,26 @@ jobs:
           git commit -m "Update reports from CI run $GITHUB_RUN_ID" || echo "No changes to commit"
           git push origin report
 
-  deploy-to-vm:
-    if: >
-      github.ref == 'refs/heads/main' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main')
-
-    runs-on: [deploy]
-    needs:
-      - build-and-push-frontend
-      - build-and-push-backend
-
-    steps:
-      - name: Checkout repository (needed for git tag lookup)
-        uses: actions/checkout@v4
-
       - name: Deploy to VM
         run: |
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} <<EOF
-          TAG_SUFFIX="${{ env.TAG_SUFFIX }}"
-          echo "Connected to VM..."
-          echo "Using tag: \$TAG_SUFFIX"
+          echo "Deploying with tag: ${{ env.TAG_SUFFIX }}"
+          ssh -tt ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "TAG_SUFFIX='${{ env.TAG_SUFFIX }}' bash -s" <<'EOF'
+            echo "Connected to VM..."
+            echo "Using tag: $TAG_SUFFIX"
 
-          # Use sudo if needed (if your user isn't in docker group)
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:\$TAG_SUFFIX
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:\$TAG_SUFFIX
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:\$TAG_SUFFIX
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:$TAG_SUFFIX
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:$TAG_SUFFIX
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:$TAG_SUFFIX
 
-          echo "Stopping old containers (if any)..."
-          sudo docker stop frontend backend1 backend2 || true
-          sudo docker rm frontend backend1 backend2 || true
+            echo "Stopping old containers..."
+            sudo docker stop frontend backend1 backend2 || true
+            sudo docker rm frontend backend1 backend2 || true
 
-          echo "Running new containers..."
-          sudo docker run -d --name frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:\$TAG_SUFFIX
-          sudo docker run -d --name backend1 -p 3001:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:\$TAG_SUFFIX
-          sudo docker run -d --name backend2 -p 3002:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:\$TAG_SUFFIX
+            echo "Running new containers..."
+            sudo docker run -d --name frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:$TAG_SUFFIX
+            sudo docker run -d --name backend1 -p 3001:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:$TAG_SUFFIX
+            sudo docker run -d --name backend2 -p 3002:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:$TAG_SUFFIX
 
-          echo "Deployment complete."
+            echo "Deployment complete."
           EOF
+
