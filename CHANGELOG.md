@@ -1,3 +1,12 @@
+# [4.20.0](https://github.com/sk00l/git-day15/compare/v4.19.0...v4.20.0) (2025-07-09)
+
+
+### Features
+
+* all done ([f1f75a4](https://github.com/sk00l/git-day15/commit/f1f75a46a59f85e21787b95ab28df4fe71938116))
+* all done ([9e4f6b9](https://github.com/sk00l/git-day15/commit/9e4f6b9feaf431c36a9fd4f3797e04185b3c94a0))
+* no ci ([f553913](https://github.com/sk00l/git-day15/commit/f5539130485b8ae1c6a89503fb6211d10cd45349))
+
 # [4.19.0](https://github.com/sk00l/git-day15/compare/v4.18.0...v4.19.0) (2025-07-09)
 
 
