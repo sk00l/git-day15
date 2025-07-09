@@ -349,7 +349,35 @@ jobs:
           git commit -m "Update reports from CI run $GITHUB_RUN_ID" || echo "No changes to commit"
           git push origin report
 
-      - name: Deploy to VM
+  deploy-to-vm:
+    name: Deploy to VM
+    runs-on: ubuntu-latest
+    needs:
+      - build-and-push-frontend
+      - build-and-push-backend
+    if: >
+      github.ref == 'refs/heads/main' || 
+      (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main')
+
+    steps:
+      - name: Checkout repository (for tag context)
+        uses: actions/checkout@v4
+
+      - name: Set Image Tag (same logic as above)
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION_TAG="${GITHUB_REF#refs/tags/}"
+            echo "TAG_SUFFIX=$VERSION_TAG" >> $GITHUB_ENV
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            git fetch --tags
+            LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "TAG_SUFFIX=$LATEST_TAG" >> $GITHUB_ENV
+          else
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy to VM via SSH
         run: |
           echo "Deploying with tag: ${{ env.TAG_SUFFIX }}"
           ssh -tt ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "TAG_SUFFIX='${{ env.TAG_SUFFIX }}' bash -s" <<'EOF'
@@ -371,4 +399,5 @@ jobs:
 
             echo "Deployment complete."
           EOF
+
 
