@@ -398,8 +398,8 @@ jobs:
             docker rm frontend backend1 backend2 || true
 
             docker run -d --name frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:$TAG_SUFFIX
-            docker run -d --name backend1 -p 3001:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:$TAG_SUFFIX
-            docker run -d --name backend2 -p 3002:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:$TAG_SUFFIX
+            docker run -d --name backend1 -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:$TAG_SUFFIX
+            docker run -d --name backend2 -p 3001:3001 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:$TAG_SUFFIX
 
             echo "Deployment complete."
           EOF
