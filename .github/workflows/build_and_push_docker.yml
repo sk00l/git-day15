@@ -358,6 +358,23 @@ jobs:
       - build-and-push-backend
 
     steps:
+      - name: Checkout repo (needed for git describe)
+        uses: actions/checkout@v4
+
+      - name: Set Image Tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION_TAG="${GITHUB_REF#refs/tags/}"
+            echo "TAG_SUFFIX=$VERSION_TAG" >> $GITHUB_ENV
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            git fetch --tags
+            LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+            echo "TAG_SUFFIX=$LATEST_TAG" >> $GITHUB_ENV
+          else
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            echo "TAG_SUFFIX=dev-${SHORT_SHA}" >> $GITHUB_ENV
+          fi
+
       - name: Set up SSH key
         run: |
           echo "${{ secrets.VM_SSH_KEY }}" > key.pem
@@ -369,22 +386,20 @@ jobs:
           ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} <<EOF
             set -e
             echo "Connected to VM"
-            echo "Using tag: ${{ env.TAG_SUFFIX }}"
+            echo "Using tag: $TAG_SUFFIX"
 
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:$TAG_SUFFIX
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:$TAG_SUFFIX
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:$TAG_SUFFIX
 
-            echo "Stopping old containers..."
             docker stop frontend backend1 backend2 || true
             docker rm frontend backend1 backend2 || true
 
-            echo "Starting new containers..."
-            docker run -d --name frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
-            docker run -d --name backend1 -p 3001:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
-            docker run -d --name backend2 -p 3002:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+            docker run -d --name frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:$TAG_SUFFIX
+            docker run -d --name backend1 -p 3001:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:$TAG_SUFFIX
+            docker run -d --name backend2 -p 3002:3000 ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:$TAG_SUFFIX
 
             echo "Deployment complete."
           EOF
