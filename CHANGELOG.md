@@ -1,3 +1,11 @@
+# [4.23.0](https://github.com/sk00l/git-day15/compare/v4.22.0...v4.23.0) (2025-07-09)
+
+
+### Features
+
+* [no ci] ([41d7f89](https://github.com/sk00l/git-day15/commit/41d7f89971940869c4145c28ff1f03db073b9311))
+* no ci ([5277dc2](https://github.com/sk00l/git-day15/commit/5277dc2aab6702bd9b087b02321a53d0308b930b))
+
 # [4.22.0](https://github.com/sk00l/git-day15/compare/v4.21.0...v4.22.0) (2025-07-09)
 
 
