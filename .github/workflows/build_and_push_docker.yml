@@ -64,7 +64,9 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:${{ env.TAG_SUFFIX }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-frontend:latest
 
       - name: Save and compress frontend Docker image
         run: |
@@ -150,7 +152,9 @@ jobs:
           context: ./backend1
           file: ./backend1/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:latest
 
       - name: Save and compress backend1 Docker image
         run: |
@@ -199,8 +203,6 @@ jobs:
           path: backend1-trivy.html
 
 
-
-
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
@@ -213,7 +215,9 @@ jobs:
           context: ./backend2
           file: ./backend2/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:${{ env.TAG_SUFFIX }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend2:latest
 
       - name: Save and compress backend2 Docker image
         run: |
@@ -358,7 +362,7 @@ jobs:
       - build-and-push-backend
 
     steps:
-      - name: Checkout repo (needed for git describe)
+      - name: Checkout repo (for git describe if needed)
         uses: actions/checkout@v4
 
       - name: Set Image Tag
@@ -379,36 +383,10 @@ jobs:
         run: |
           echo "${{ secrets.VM_SSH_KEY }}" > key.pem
           chmod 600 key.pem
-
-      - name: Deploy containers on VM
-        run: |
-          echo "Deploying with tag: ${{ env.TAG_SUFFIX }}"
-          ssh -i key.pem -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} \
-            "TAG_SUFFIX=${{ env.TAG_SUFFIX }}" \
-            "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" \
-            "DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}" \
-            'bash -s' <<'EOF'
-            set -e
+          ssh -i key.pem ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} <<'EOF'
             echo "Connected to VM"
-            echo "Using tag: $TAG_SUFFIX"
-
-            # Login to DockerHub using stdin (non-interactive)
-            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-
-            # Pull the latest images
-            docker pull $DOCKERHUB_USERNAME/fellowship-frontend:$TAG_SUFFIX
-            docker pull $DOCKERHUB_USERNAME/fellowship-backend1:$TAG_SUFFIX
-            docker pull $DOCKERHUB_USERNAME/fellowship-backend2:$TAG_SUFFIX
-
-            # Stop and remove existing containers
-            docker stop frontend backend1 backend2 || true
-            docker rm frontend backend1 backend2 || true
-
-            # Run new containers
-            docker run -d --name frontend -p 80:80 $DOCKERHUB_USERNAME/fellowship-frontend:$TAG_SUFFIX
-            docker run -d --name backend1 -p 3000:3000 $DOCKERHUB_USERNAME/fellowship-backend1:$TAG_SUFFIX
-            docker run -d --name backend2 -p 3001:3001 $DOCKERHUB_USERNAME/fellowship-backend2:$TAG_SUFFIX
-
+            cd /home/skool/ci-cddeployment
+            docker-compose -f docker-compose.yml up -d
             echo "Deployment complete."
           EOF
 
