@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/sk00l/git-day15/compare/v4.28.0...v5.0.0) (2025-07-13)
+
+
+* feat!: MAJOR CHANGES TO LOGIN ([ce07d13](https://github.com/sk00l/git-day15/commit/ce07d13f525479f25b2c1057169de64fb39d686f))
+* feat!: MAJOR CHANGES TO LOGIN ([743eb15](https://github.com/sk00l/git-day15/commit/743eb157e9aff73064cb396ab1481e5758c8f3b8))
+
+
+### BREAKING CHANGES
+
+* MAJOPR CHANGE FIX FIX
+* MAJOPR CHANGE FIX FIX
+
 # [4.28.0](https://github.com/sk00l/git-day15/compare/v4.27.0...v4.28.0) (2025-07-09)
 
 
