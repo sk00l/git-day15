@@ -158,7 +158,6 @@ jobs:
 
       - name: Save and compress backend1 Docker image
         run: |
-          # Remove any existing tar file
           rm -f backend1.tar.gz || true
           docker save ${{ secrets.DOCKERHUB_USERNAME }}/fellowship-backend1:${{ env.TAG_SUFFIX }} | gzip > backend1.tar.gz
         continue-on-error: true
